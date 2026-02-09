@@ -12,7 +12,7 @@ bin/
 *.ipr
 .DS_Store
 .env
-.env.example
+
 logs/
 run_app.bat
 run_err.txt
