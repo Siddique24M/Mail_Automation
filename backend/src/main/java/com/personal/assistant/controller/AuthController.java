@@ -13,6 +13,9 @@ public class AuthController {
 
     private final GmailService gmailService;
 
+    @org.springframework.beans.factory.annotation.Value("${frontend.url:http://localhost:5173}")
+    private String frontendUrl;
+
     public AuthController(GmailService gmailService) {
         this.gmailService = gmailService;
     }
@@ -26,6 +29,6 @@ public class AuthController {
     @GetMapping("/login/oauth2/code/google")
     public void callback(@RequestParam("code") String code, HttpServletResponse response) throws IOException {
         gmailService.exchangeCode(code);
-        response.sendRedirect("http://localhost:5173/dashboard"); // Redirect to Frontend Dashboard
+        response.sendRedirect(frontendUrl + "/dashboard"); // Redirect to Frontend Dashboard
     }
 }

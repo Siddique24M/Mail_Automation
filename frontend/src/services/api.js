@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'http://localhost:9090',
+    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:9090',
 });
 
 export const getEvents = async () => {
@@ -15,7 +15,8 @@ export const getEvents = async () => {
 };
 
 export const loginWithGoogle = () => {
-    window.location.href = 'http://localhost:9090/login/google';
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:9090';
+    window.location.href = `${baseUrl}/login/google`;
 };
 
 export default api;

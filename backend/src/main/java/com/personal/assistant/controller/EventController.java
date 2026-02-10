@@ -12,7 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/events")
-@CrossOrigin(origins = "http://localhost:5173") // Allow React Frontend
+@CrossOrigin(origins = { "http://localhost:5173", "https://mail-automation-brown.vercel.app" }) // Allow React Frontend
 public class EventController {
 
     @Autowired
