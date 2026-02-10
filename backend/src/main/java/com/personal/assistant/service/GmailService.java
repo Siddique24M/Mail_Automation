@@ -136,6 +136,10 @@ public class GmailService {
             LocalDateTime tenDaysAgo = LocalDateTime.now().minusDays(10);
             jobEventRepository.deleteByCreatedAtBefore(tenDaysAgo);
 
+            // 2. Remove legacy events (missing messageId) to prevent duplicates during
+            // transition
+            jobEventRepository.deleteByMessageIdIsNull();
+
             Gmail service = getGmailClient();
 
             // Search for keywords, newer than 10 days
@@ -149,9 +153,11 @@ public class GmailService {
             }
 
             for (Message msg : messages) {
-                // Check if already processed (could use ID in DB to avoid dupes)
-                // For now, parsing every time is inefficient, improvement: store processed
-                // Message IDs.
+                // Check if already processed
+                if (jobEventRepository.existsByMessageId(msg.getId())) {
+                    System.out.println("Skipping duplicate message: " + msg.getId());
+                    continue;
+                }
 
                 Message fullMsg = service.users().messages().get("me", msg.getId()).execute();
 
@@ -173,6 +179,7 @@ public class GmailService {
                 event.setCompanyName(subject); // Simplified
                 event.setEventType(data.getOrDefault("type", "Other"));
                 event.setActionLink(data.get("link"));
+                event.setMessageId(msg.getId());
 
                 if (data.containsKey("date")) {
                     event.setEventDate(emailParser.parseDateString(data.get("date")));
@@ -180,8 +187,6 @@ public class GmailService {
 
                 event.setReminded(false);
 
-                // Simple dupe check by date & company
-                // Real app should check message ID
                 jobEventRepository.save(event);
             }
 

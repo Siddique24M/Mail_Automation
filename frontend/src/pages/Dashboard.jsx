@@ -27,7 +27,7 @@ const Dashboard = () => {
     const handleSync = async () => {
         setSyncing(true);
         await syncEvents();
-        await fetchEvents(); // Refresh list after sync
+        await fetchEvents();
         setSyncing(false);
     };
 
@@ -55,27 +55,29 @@ const Dashboard = () => {
 
     return (
         <div className="container" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-            <header style={{ display: 'flex', flexDirection: 'column', gap: '2rem', marginBottom: '3rem', paddingTop: '1rem' }}>
+            <header style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '3rem', paddingTop: '1rem' }}>
+                {/* Row 1: Logo Left, Title Right */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <div style={{
-                            width: '40px',
-                            height: '40px',
-                            borderRadius: '50%',
-                            background: 'linear-gradient(135deg, var(--primary-color), var(--accent-color))',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontWeight: 'bold',
-                            color: 'white',
-                            fontSize: '1.2rem',
-                            boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-                        }}>
-                            sm
-                        </div>
-                        <h1 style={{ fontSize: '2rem', margin: 0 }}>Dashboard</h1>
+                    <div style={{
+                        width: '80px',
+                        height: '80px',
+                        borderRadius: '50%',
+                        background: 'linear-gradient(135deg, var(--primary-color), var(--accent-color))',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 'bold',
+                        color: 'white',
+                        fontSize: '2.5rem',
+                        boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                    }}>
+                        sm
                     </div>
+                    <h1 style={{ fontSize: '2.5rem', margin: 0 }}>Dashboard</h1>
+                </div>
 
+                {/* Row 2: Filters Centered */}
+                <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                         {['All', 'Interview', 'Exam', 'Other'].map(f => (
                             <button
@@ -83,8 +85,8 @@ const Dashboard = () => {
                                 onClick={() => setFilter(f)}
                                 className={filter === f ? 'btn-primary' : 'glass-card'}
                                 style={{
-                                    padding: '0.5rem 1rem',
-                                    fontSize: '0.8rem',
+                                    padding: '0.5rem 1.5rem',
+                                    fontSize: '0.9rem',
                                     cursor: 'pointer',
                                     border: 'none',
                                     borderRadius: '8px',
@@ -98,29 +100,30 @@ const Dashboard = () => {
                     </div>
                 </div>
 
+                {/* Row 3: Controls Evenly Spaced */}
                 <div style={{ display: 'flex', justifyContent: 'space-evenly', alignItems: 'center', width: '100%', padding: '0 1rem' }}>
                     <button
                         onClick={handleSync}
                         disabled={syncing}
                         className="btn-secondary"
-                        style={{ padding: '0.5rem 2rem', fontSize: '1rem', opacity: syncing ? 0.7 : 1 }}
+                        style={{ padding: '0.75rem 2rem', fontSize: '1rem', opacity: syncing ? 0.7 : 1, borderRadius: '12px' }}
                     >
                         {syncing ? 'Syncing...' : 'Sync Emails'}
                     </button>
-                    <span className="glass-card" style={{ padding: '0.5rem 2rem', fontSize: '1rem' }}>
+                    <span className="glass-card" style={{ padding: '0.75rem 2rem', fontSize: '1rem', borderRadius: '12px' }}>
                         Logged in as User
                     </span>
                     <button
                         onClick={handleLogout}
                         className="btn-primary"
-                        style={{ padding: '0.5rem 2rem', fontSize: '1rem' }}
+                        style={{ padding: '0.75rem 2rem', fontSize: '1rem', borderRadius: '12px' }}
                     >
                         Switch Account
                     </button>
                 </div>
             </header>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem', flex: 1 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem', flex: 1 }}>
                 {filteredEvents.map((event) => {
                     const isUrgent = event.eventType === 'Exam' || event.eventType === 'Interview';
                     const cardStyle = isUrgent ? { borderLeft: '4px solid var(--danger-color)' } : { borderLeft: '4px solid var(--success-color)' };

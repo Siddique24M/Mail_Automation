@@ -17,6 +17,9 @@ public class JobEvent {
     private boolean isReminded; // To track if you sent a notification
     private LocalDateTime createdAt;
 
+    @jakarta.persistence.Column(unique = true)
+    private String messageId;
+
     @jakarta.persistence.PrePersist
     public void prePersist() {
         if (createdAt == null) {
@@ -79,5 +82,13 @@ public class JobEvent {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getMessageId() {
+        return messageId;
+    }
+
+    public void setMessageId(String messageId) {
+        this.messageId = messageId;
     }
 }
