@@ -195,4 +195,9 @@ public class GmailService {
         }
         return "";
     }
+
+    public void clearUserData() {
+        userCredentialRepository.deleteAll();
+        jobEventRepository.deleteAll();
+    }
 }

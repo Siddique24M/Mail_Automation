@@ -19,4 +19,12 @@ export const loginWithGoogle = () => {
     window.location.href = `${baseUrl}/login/google`;
 };
 
+export const logout = async () => {
+    try {
+        await api.post('/logout');
+    } catch (error) {
+        console.error("Error logging out", error);
+    }
+};
+
 export default api;

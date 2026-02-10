@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { getEvents } from '../services/api';
+import { getEvents, logout } from '../services/api';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchEvents = async () => {
@@ -13,6 +15,11 @@ const Dashboard = () => {
         };
         fetchEvents();
     }, []);
+
+    const handleLogout = async () => {
+        await logout();
+        navigate('/login');
+    };
 
     const formatDate = (dateString, time = false) => {
         if (!dateString) return 'N/A';
@@ -36,6 +43,13 @@ const Dashboard = () => {
                     <span className="glass-card" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>
                         Logged in as User
                     </span>
+                    <button
+                        onClick={handleLogout}
+                        className="btn-primary"
+                        style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}
+                    >
+                        Switch Account
+                    </button>
                 </div>
             </header>
 

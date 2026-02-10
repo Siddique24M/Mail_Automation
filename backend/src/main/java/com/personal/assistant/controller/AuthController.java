@@ -31,4 +31,10 @@ public class AuthController {
         gmailService.exchangeCode(code);
         response.sendRedirect(frontendUrl + "/dashboard"); // Redirect to Frontend Dashboard
     }
+
+    @org.springframework.web.bind.annotation.PostMapping("/logout")
+    public void logout(HttpServletResponse response) {
+        gmailService.clearUserData();
+        response.setStatus(HttpServletResponse.SC_OK);
+    }
 }
