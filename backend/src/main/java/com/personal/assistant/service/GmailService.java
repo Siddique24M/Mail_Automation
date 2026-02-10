@@ -158,7 +158,9 @@ public class GmailService {
                 }
 
                 String body = getBody(fullMsg);
+                System.out.println("Processing email: " + subject);
                 Map<String, String> data = emailParser.parseEmail(subject, body);
+                System.out.println("Parsed data: " + data);
 
                 if (data.containsKey("date")) {
                     // It's a valid event

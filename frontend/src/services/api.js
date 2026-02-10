@@ -27,4 +27,12 @@ export const logout = async () => {
     }
 };
 
+export const syncEvents = async () => {
+    try {
+        await api.post('/api/events/sync');
+    } catch (error) {
+        console.error("Error syncing events", error);
+    }
+};
+
 export default api;

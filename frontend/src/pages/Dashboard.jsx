@@ -1,24 +1,33 @@
 import React, { useEffect, useState } from 'react';
-import { getEvents, logout } from '../services/api';
+import { getEvents, logout, syncEvents } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [syncing, setSyncing] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
-        const fetchEvents = async () => {
-            const data = await getEvents();
-            setEvents(data);
-            setLoading(false);
-        };
         fetchEvents();
     }, []);
+
+    const fetchEvents = async () => {
+        const data = await getEvents();
+        setEvents(data);
+        setLoading(false);
+    };
 
     const handleLogout = async () => {
         await logout();
         navigate('/login');
+    };
+
+    const handleSync = async () => {
+        setSyncing(true);
+        await syncEvents();
+        await fetchEvents(); // Refresh list after sync
+        setSyncing(false);
     };
 
     const formatDate = (dateString, time = false) => {
@@ -40,6 +49,14 @@ const Dashboard = () => {
             <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
                 <h1 style={{ fontSize: '2rem' }}>Dashboard</h1>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <button
+                        onClick={handleSync}
+                        disabled={syncing}
+                        className="btn-secondary"
+                        style={{ padding: '0.5rem 1rem', fontSize: '0.9rem', marginRight: '0.5rem', opacity: syncing ? 0.7 : 1 }}
+                    >
+                        {syncing ? 'Syncing...' : 'Sync Emails'}
+                    </button>
                     <span className="glass-card" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>
                         Logged in as User
                     </span>
