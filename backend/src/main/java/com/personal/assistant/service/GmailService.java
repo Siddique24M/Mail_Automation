@@ -19,6 +19,7 @@ import com.personal.assistant.entity.JobEvent;
 import com.personal.assistant.entity.UserCredential;
 import com.personal.assistant.repository.JobEventRepository;
 import com.personal.assistant.repository.UserCredentialRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -128,12 +129,17 @@ public class GmailService {
                 .build();
     }
 
+    @Transactional
     public void fetchAndSaveNewEvents() {
         try {
+            // 1. Clean up old events first
+            LocalDateTime tenDaysAgo = LocalDateTime.now().minusDays(10);
+            jobEventRepository.deleteByCreatedAtBefore(tenDaysAgo);
+
             Gmail service = getGmailClient();
 
-            // Search for keywords
-            String query = "subject:interview OR subject:exam OR subject:test OR subject:registration";
+            // Search for keywords, newer than 10 days
+            String query = "subject:interview OR subject:exam OR subject:test OR subject:registration newer_than:10d";
             ListMessagesResponse response = service.users().messages().list("me").setQ(query).execute();
 
             List<Message> messages = response.getMessages();
@@ -162,19 +168,21 @@ public class GmailService {
                 Map<String, String> data = emailParser.parseEmail(subject, body);
                 System.out.println("Parsed data: " + data);
 
-                if (data.containsKey("date")) {
-                    // It's a valid event
-                    JobEvent event = new JobEvent();
-                    event.setCompanyName(subject); // Simplified
-                    event.setEventType(data.get("type"));
-                    event.setActionLink(data.get("link"));
-                    event.setEventDate(emailParser.parseDateString(data.get("date")));
-                    event.setReminded(false);
+                // Always save if it matched the subject query
+                JobEvent event = new JobEvent();
+                event.setCompanyName(subject); // Simplified
+                event.setEventType(data.getOrDefault("type", "Other"));
+                event.setActionLink(data.get("link"));
 
-                    // Simple dupe check by date & company
-                    // Real app should check message ID
-                    jobEventRepository.save(event);
+                if (data.containsKey("date")) {
+                    event.setEventDate(emailParser.parseDateString(data.get("date")));
                 }
+
+                event.setReminded(false);
+
+                // Simple dupe check by date & company
+                // Real app should check message ID
+                jobEventRepository.save(event);
             }
 
         } catch (Exception e) {

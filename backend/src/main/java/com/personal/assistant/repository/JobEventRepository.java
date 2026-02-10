@@ -10,4 +10,6 @@ import java.util.List;
 @Repository
 public interface JobEventRepository extends JpaRepository<JobEvent, Long> {
     List<JobEvent> findByEventDateAfterOrderByEventDateAsc(LocalDateTime date);
+
+    void deleteByCreatedAtBefore(LocalDateTime expiryDate);
 }

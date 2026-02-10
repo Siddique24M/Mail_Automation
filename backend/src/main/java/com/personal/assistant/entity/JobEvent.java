@@ -15,6 +15,14 @@ public class JobEvent {
     private LocalDateTime eventDate;
     private String actionLink; // The test link or zoom link
     private boolean isReminded; // To track if you sent a notification
+    private LocalDateTime createdAt;
+
+    @jakarta.persistence.PrePersist
+    public void prePersist() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+    }
 
     // Getters and Setters
     public Long getId() {
@@ -63,5 +71,13 @@ public class JobEvent {
 
     public void setReminded(boolean reminded) {
         isReminded = reminded;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }
