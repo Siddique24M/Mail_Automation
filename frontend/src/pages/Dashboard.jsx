@@ -55,28 +55,28 @@ const Dashboard = () => {
 
     return (
         <div className="container" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-            <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem', paddingTop: '1rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <div style={{
-                        width: '40px',
-                        height: '40px',
-                        borderRadius: '50%',
-                        background: 'linear-gradient(135deg, var(--primary-color), var(--accent-color))',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontWeight: 'bold',
-                        color: 'white',
-                        fontSize: '1.2rem',
-                        boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-                    }}>
-                        sm
+            <header style={{ display: 'flex', flexDirection: 'column', gap: '2rem', marginBottom: '3rem', paddingTop: '1rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <div style={{
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '50%',
+                            background: 'linear-gradient(135deg, var(--primary-color), var(--accent-color))',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: 'bold',
+                            color: 'white',
+                            fontSize: '1.2rem',
+                            boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                        }}>
+                            sm
+                        </div>
+                        <h1 style={{ fontSize: '2rem', margin: 0 }}>Dashboard</h1>
                     </div>
-                    <h1 style={{ fontSize: '2rem', margin: 0 }}>Dashboard</h1>
-                </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <div style={{ marginRight: '1rem', display: 'flex', gap: '0.5rem' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
                         {['All', 'Interview', 'Exam', 'Other'].map(f => (
                             <button
                                 key={f}
@@ -96,21 +96,24 @@ const Dashboard = () => {
                             </button>
                         ))}
                     </div>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-evenly', alignItems: 'center', width: '100%', padding: '0 1rem' }}>
                     <button
                         onClick={handleSync}
                         disabled={syncing}
                         className="btn-secondary"
-                        style={{ padding: '0.5rem 1rem', fontSize: '0.9rem', marginRight: '0.5rem', opacity: syncing ? 0.7 : 1 }}
+                        style={{ padding: '0.5rem 2rem', fontSize: '1rem', opacity: syncing ? 0.7 : 1 }}
                     >
                         {syncing ? 'Syncing...' : 'Sync Emails'}
                     </button>
-                    <span className="glass-card" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>
+                    <span className="glass-card" style={{ padding: '0.5rem 2rem', fontSize: '1rem' }}>
                         Logged in as User
                     </span>
                     <button
                         onClick={handleLogout}
                         className="btn-primary"
-                        style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}
+                        style={{ padding: '0.5rem 2rem', fontSize: '1rem' }}
                     >
                         Switch Account
                     </button>
