@@ -14,7 +14,7 @@ public class EmailPoller {
     }
 
     // Runs every 4 hours (14400000 ms)
-    @Scheduled(fixedRate = 14400000)
+    @Scheduled(fixedRate = 600000)
     public void scanInbox() {
         System.out.println("Polling Gmail for new events...");
         try {
