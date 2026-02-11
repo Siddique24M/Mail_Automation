@@ -58,7 +58,8 @@ const Dashboard = () => {
         if (filter === 'All') return true;
         if (filter === 'Interview') return event.eventType === 'Interview';
         if (filter === 'Exam') return event.eventType === 'Exam';
-        if (filter === 'Other') return event.eventType !== 'Interview' && event.eventType !== 'Exam';
+        if (filter === 'Registration') return event.eventType === 'Registration';
+        if (filter === 'Other') return event.eventType !== 'Interview' && event.eventType !== 'Exam' && event.eventType !== 'Registration';
         return true;
     });
 
@@ -92,7 +93,7 @@ const Dashboard = () => {
                 {/* Row 2: Filters Centered */}
                 <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        {['All', 'Interview', 'Exam', 'Other'].map(f => (
+                        {['All', 'Interview', 'Exam', 'Registration', 'Other'].map(f => (
                             <button
                                 key={f}
                                 onClick={() => setFilter(f)}
@@ -159,7 +160,10 @@ const Dashboard = () => {
                                     {formatDate(event.eventDate)}
                                 </span>
                             </div>
-                            <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>{event.companyName}</h3>
+                            <h3 style={{ fontSize: '1.25rem', marginBottom: '0.25rem' }}>Subject: {event.subject || event.companyName}</h3>
+                            <p style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 'bold', marginBottom: '0.5rem' }}>
+                                {event.companyName}
+                            </p>
                             {event.senderEmail && (
                                 <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
                                     From: {event.senderEmail}

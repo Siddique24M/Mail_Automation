@@ -142,7 +142,7 @@ public class GmailService {
             Gmail service = getGmailClient();
 
             // Search for keywords, newer than 10 days
-            String query = "subject:interview OR subject:exam OR subject:test OR subject:registration newer_than:10d";
+            String query = "subject:interview OR subject:exam OR subject:test OR subject:registration OR subject:screening newer_than:10d";
             ListMessagesResponse response = service.users().messages().list("me").setQ(query).execute();
 
             List<Message> messages = response.getMessages();
@@ -162,6 +162,7 @@ public class GmailService {
 
                 String subject = "";
                 String senderEmail = "";
+                String senderName = "";
 
                 // Extract headers
                 for (var header : fullMsg.getPayload().getHeaders()) {
@@ -170,6 +171,7 @@ public class GmailService {
                     }
                     if (header.getName().equalsIgnoreCase("From")) {
                         senderEmail = extractEmailAddress(header.getValue());
+                        senderName = extractSenderName(header.getValue());
                     }
                 }
 
@@ -180,7 +182,8 @@ public class GmailService {
 
                 // Always save if it matched the subject query
                 JobEvent event = new JobEvent();
-                event.setCompanyName(subject); // Simplified
+                event.setCompanyName(senderName);
+                event.setSubject(subject);
                 event.setEventType(data.getOrDefault("type", "Other"));
                 event.setActionLink(data.get("link"));
                 event.setMessageId(msg.getId());
@@ -252,6 +255,22 @@ public class GmailService {
         }
 
         return fromHeader.trim();
+    }
+
+    private String extractSenderName(String fromHeader) {
+        if (fromHeader == null || fromHeader.isEmpty()) {
+            return "Unknown";
+        }
+        // "Google <no-reply@accounts.google.com>" -> "Google"
+        int start = fromHeader.indexOf('<');
+        if (start > 0) {
+            return fromHeader.substring(0, start).trim().replace("\"", "");
+        }
+        // If just email, or no brackets
+        if (fromHeader.contains("@")) {
+            return extractEmailAddress(fromHeader); // Fallback to email
+        }
+        return fromHeader.replace("\"", "").trim();
     }
 
     // Get user profile information (name and email)

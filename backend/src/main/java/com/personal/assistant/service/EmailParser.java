@@ -66,7 +66,9 @@ public class EmailParser {
 
         // Determine Event Type based on keywords
         String lowerContent = content.toLowerCase();
-        if (lowerContent.contains("interview")) {
+        if (lowerContent.contains("screening")) {
+            extractedData.put("type", "Other");
+        } else if (lowerContent.contains("interview")) {
             extractedData.put("type", "Interview");
         } else if (lowerContent.contains("exam") || lowerContent.contains("test")) {
             extractedData.put("type", "Exam");

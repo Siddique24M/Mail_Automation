@@ -10,7 +10,8 @@ public class JobEvent {
     @Id
     @GeneratedValue
     private Long id;
-    private String companyName; // Extracted from "From" or Subject
+    private String companyName; // Extracted from "From" (Sender Name)
+    private String subject; // Extracted from "Subject"
     private String eventType; // "Exam", "Registration", "Interview"
     private LocalDateTime eventDate;
     private String actionLink; // The test link or zoom link
@@ -44,6 +45,14 @@ public class JobEvent {
 
     public void setCompanyName(String companyName) {
         this.companyName = companyName;
+    }
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
     }
 
     public String getEventType() {
