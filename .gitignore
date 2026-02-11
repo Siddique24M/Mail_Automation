@@ -1,0 +1,33 @@
+# Documentation files (keep only README.md in version control)
+QUICKSTART.md
+SETUP_CHECKLIST.md
+ARCHITECTURE.md
+DOCS_INDEX.md
+
+# Environment files
+.env
+*.env
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.iml
+*.iws
+*.ipr
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
