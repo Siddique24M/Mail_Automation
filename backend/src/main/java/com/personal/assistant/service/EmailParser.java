@@ -18,8 +18,19 @@ import java.util.regex.Pattern;
 public class EmailParser {
 
     // Regex Patterns
-    // Date: Matches "24th Oct 2024", "24 Oct 2024", "24th October 2024"
-    private static final String DATE_REGEX = "(\\d{1,2}(?:st|nd|rd|th)?\\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\\s+\\d{4})";
+    // Date: Matches multiple formats:
+    // - "24th Oct 2024", "24 Oct 2024", "24th October 2024"
+    // - "Oct 24, 2024", "October 24, 2024"
+    // - "2024-10-24", "24/10/2024", "10/24/2024", "24-10-2024"
+    private static final String DATE_REGEX = "(\\d{1,2}(?:st|nd|rd|th)?\\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\\s+\\d{4})|"
+            + // 24 Oct 2024
+            "((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\\s+\\d{1,2}(?:st|nd|rd|th)?,\\s+\\d{4})|" + // Oct
+                                                                                                                    // 24,
+                                                                                                                    // 2024
+            "(\\d{4}-\\d{2}-\\d{2})|" + // 2024-10-24
+            "(\\d{1,2}/\\d{1,2}/\\d{4})|" + // 24/10/2024 or 10/24/2024
+            "(\\d{1,2}-\\d{1,2}-\\d{4})|" + // 24-10-2024
+            "(\\d{1,2}\\.\\d{1,2}\\.\\d{4})"; // 24.10.2024
 
     // Link: Standard URL pattern
     private static final String LINK_REGEX = "https?://(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)";
@@ -37,7 +48,13 @@ public class EmailParser {
         // Extract Date
         Matcher dateMatcher = datePattern.matcher(content);
         if (dateMatcher.find()) {
-            extractedData.put("date", dateMatcher.group(1));
+            // Use group(0) to get the entire matched text, not group(1)
+            // This is important because our regex has multiple alternatives (|)
+            String matchedDate = dateMatcher.group(0);
+            extractedData.put("date", matchedDate);
+            System.out.println("Found date: " + matchedDate);
+        } else {
+            System.out.println("No date found in: " + content.substring(0, Math.min(200, content.length())));
         }
 
         // Extract Link associated with triggers like "Test Link" or just first link
@@ -62,22 +79,82 @@ public class EmailParser {
         return extractedData;
     }
 
-    // Helper to parse date string to LocalDateTime
+    // Helper to parse date string to LocalDateTime - supports multiple formats
     public LocalDateTime parseDateString(String dateStr) {
-        try {
-            // Remove st, nd, rd, th
-            String cleanDate = dateStr.replaceAll("(?<=\\d)(st|nd|rd|th)", "");
-            // Pattern to match "24 Oct 2024" or "24 October 2024"
-            DateTimeFormatter formatter = new DateTimeFormatterBuilder()
-                    .appendPattern("[d MMM yyyy][d MMMM yyyy]")
-                    .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
-                    .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
-                    .toFormatter(Locale.ENGLISH);
+        if (dateStr == null || dateStr.trim().isEmpty()) {
+            return null;
+        }
 
-            return LocalDateTime.parse(cleanDate, formatter);
-            // Note: LocalDateTime requires time, defaulted to 00:00
+        try {
+            // Remove st, nd, rd, th suffixes
+            String cleanDate = dateStr.replaceAll("(?<=\\d)(st|nd|rd|th)", "").trim();
+
+            // Try multiple date formats
+            DateTimeFormatter[] formatters = {
+                    // "24 Oct 2024" or "24 October 2024"
+                    new DateTimeFormatterBuilder()
+                            .appendPattern("[d MMM yyyy][d MMMM yyyy]")
+                            .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
+                            .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
+                            .toFormatter(Locale.ENGLISH),
+
+                    // "Oct 24, 2024" or "October 24, 2024"
+                    new DateTimeFormatterBuilder()
+                            .appendPattern("[MMM d, yyyy][MMMM d, yyyy]")
+                            .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
+                            .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
+                            .toFormatter(Locale.ENGLISH),
+
+                    // "2024-10-24" (ISO format)
+                    new DateTimeFormatterBuilder()
+                            .appendPattern("yyyy-MM-dd")
+                            .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
+                            .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
+                            .toFormatter(Locale.ENGLISH),
+
+                    // "24/10/2024" or "10/24/2024"
+                    new DateTimeFormatterBuilder()
+                            .appendPattern("[dd/MM/yyyy][MM/dd/yyyy]")
+                            .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
+                            .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
+                            .toFormatter(Locale.ENGLISH),
+
+                    // "24-10-2024" or "10-24-2024"
+                    new DateTimeFormatterBuilder()
+                            .appendPattern("[dd-MM-yyyy][MM-dd-yyyy]")
+                            .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
+                            .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
+                            .toFormatter(Locale.ENGLISH),
+
+                    // "24.10.2024"
+                    new DateTimeFormatterBuilder()
+                            .appendPattern("dd.MM.yyyy")
+                            .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
+                            .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
+                            .toFormatter(Locale.ENGLISH)
+            };
+
+            // Try each formatter
+            for (DateTimeFormatter formatter : formatters) {
+                try {
+                    return LocalDateTime.parse(cleanDate, formatter);
+                } catch (Exception e) {
+                    // Try next formatter
+                }
+            }
+
+            // If all formatters fail, try parsing as LocalDate and convert
+            try {
+                LocalDate localDate = LocalDate.parse(cleanDate, DateTimeFormatter.ISO_LOCAL_DATE);
+                return localDate.atStartOfDay();
+            } catch (Exception e) {
+                // Continue to error logging
+            }
+
+            System.err.println("Could not parse date with any format: " + dateStr);
+            return null;
         } catch (Exception e) {
-            System.err.println("Could not parse date: " + dateStr);
+            System.err.println("Error parsing date: " + dateStr + " - " + e.getMessage());
             return null;
         }
     }

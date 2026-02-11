@@ -1,6 +1,5 @@
 package com.personal.assistant.service;
 
-import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
@@ -9,7 +8,6 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.client.util.store.DataStoreFactory;
 import com.google.api.client.util.store.MemoryDataStoreFactory;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.model.ListMessagesResponse;
@@ -22,12 +20,13 @@ import com.personal.assistant.repository.UserCredentialRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import java.io.IOException;
-import java.security.GeneralSecurityException;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -162,10 +161,15 @@ public class GmailService {
                 Message fullMsg = service.users().messages().get("me", msg.getId()).execute();
 
                 String subject = "";
+                String senderEmail = "";
+
                 // Extract headers
                 for (var header : fullMsg.getPayload().getHeaders()) {
                     if (header.getName().equalsIgnoreCase("Subject")) {
                         subject = header.getValue();
+                    }
+                    if (header.getName().equalsIgnoreCase("From")) {
+                        senderEmail = extractEmailAddress(header.getValue());
                     }
                 }
 
@@ -180,9 +184,20 @@ public class GmailService {
                 event.setEventType(data.getOrDefault("type", "Other"));
                 event.setActionLink(data.get("link"));
                 event.setMessageId(msg.getId());
+                event.setSenderEmail(senderEmail);
 
                 if (data.containsKey("date")) {
                     event.setEventDate(emailParser.parseDateString(data.get("date")));
+                }
+
+                // Fallback: If no date found in text, use email received date
+                if (event.getEventDate() == null) {
+                    long internalDateVal = fullMsg.getInternalDate();
+                    LocalDateTime emailDate = Instant.ofEpochMilli(internalDateVal)
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDateTime();
+                    event.setEventDate(emailDate);
+                    System.out.println("Using email date as fallback: " + emailDate);
                 }
 
                 event.setReminded(false);
@@ -209,6 +224,62 @@ public class GmailService {
             }
         }
         return "";
+    }
+
+    // Extract email address from "From" header
+    // Example: "John Doe <john@example.com>" -> "john@example.com"
+    private String extractEmailAddress(String fromHeader) {
+        if (fromHeader == null || fromHeader.isEmpty()) {
+            return "";
+        }
+
+        // Check if email is in angle brackets
+        int start = fromHeader.indexOf('<');
+        int end = fromHeader.indexOf('>');
+
+        if (start != -1 && end != -1 && end > start) {
+            return fromHeader.substring(start + 1, end).trim();
+        }
+
+        // If no angle brackets, assume the whole string is the email
+        // or extract using regex
+        String emailRegex = "([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})";
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(emailRegex);
+        java.util.regex.Matcher matcher = pattern.matcher(fromHeader);
+
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+
+        return fromHeader.trim();
+    }
+
+    // Get user profile information (name and email)
+    public Map<String, String> getUserInfo() {
+        Map<String, String> userInfo = new HashMap<>();
+        try {
+            Gmail service = getGmailClient();
+            com.google.api.services.gmail.model.Profile profile = service.users().getProfile("me").execute();
+
+            userInfo.put("email", profile.getEmailAddress());
+
+            // Extract first name from email (before @)
+            String email = profile.getEmailAddress();
+            if (email != null && email.contains("@")) {
+                String localPart = email.substring(0, email.indexOf("@"));
+                // Capitalize first letter
+                String firstName = localPart.substring(0, 1).toUpperCase() + localPart.substring(1);
+                userInfo.put("name", firstName);
+            } else {
+                userInfo.put("name", "User");
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error getting user info: " + e.getMessage());
+            userInfo.put("name", "User");
+            userInfo.put("email", "");
+        }
+        return userInfo;
     }
 
     public void clearUserData() {

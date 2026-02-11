@@ -32,6 +32,11 @@ public class AuthController {
         response.sendRedirect(frontendUrl + "/dashboard"); // Redirect to Frontend Dashboard
     }
 
+    @GetMapping("/auth/user")
+    public java.util.Map<String, String> getUserInfo() {
+        return gmailService.getUserInfo();
+    }
+
     @org.springframework.web.bind.annotation.PostMapping("/logout")
     public void logout(HttpServletResponse response) {
         gmailService.clearUserData();

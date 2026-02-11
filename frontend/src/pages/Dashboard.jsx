@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getEvents, logout, syncEvents } from '../services/api';
+import { getEvents, logout, syncEvents, getUserInfo } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
@@ -7,11 +7,18 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(true);
     const [syncing, setSyncing] = useState(false);
     const [filter, setFilter] = useState('All');
+    const [userInfo, setUserInfo] = useState({ name: 'User', email: '' });
     const navigate = useNavigate();
 
     useEffect(() => {
         fetchEvents();
+        fetchUserInfo();
     }, []);
+
+    const fetchUserInfo = async () => {
+        const data = await getUserInfo();
+        setUserInfo(data);
+    };
 
     const fetchEvents = async () => {
         const data = await getEvents();
@@ -33,12 +40,18 @@ const Dashboard = () => {
 
     const formatDate = (dateString, time = false) => {
         if (!dateString) return 'N/A';
-        const options = { year: 'numeric', month: 'short', day: 'numeric' };
-        if (time) {
-            options.hour = '2-digit';
-            options.minute = '2-digit';
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return 'N/A';
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            if (time) {
+                options.hour = '2-digit';
+                options.minute = '2-digit';
+            }
+            return date.toLocaleDateString('en-US', options);
+        } catch (error) {
+            return 'N/A';
         }
-        return new Date(dateString).toLocaleDateString('en-US', options);
     };
 
     const filteredEvents = events.filter(event => {
@@ -111,7 +124,7 @@ const Dashboard = () => {
                         {syncing ? 'Syncing...' : 'Sync Emails'}
                     </button>
                     <span className="glass-card" style={{ padding: '0.75rem 2rem', fontSize: '1rem', borderRadius: '12px' }}>
-                        Logged in as User
+                        Logged in as {userInfo.name}
                     </span>
                     <button
                         onClick={handleLogout}
@@ -147,6 +160,11 @@ const Dashboard = () => {
                                 </span>
                             </div>
                             <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>{event.companyName}</h3>
+                            {event.senderEmail && (
+                                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+                                    From: {event.senderEmail}
+                                </p>
+                            )}
                             {event.actionLink && (
                                 <a
                                     href={event.actionLink}

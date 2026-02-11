@@ -20,6 +20,8 @@ public class JobEvent {
     @jakarta.persistence.Column(unique = true)
     private String messageId;
 
+    private String senderEmail; // Email address of the sender
+
     @jakarta.persistence.PrePersist
     public void prePersist() {
         if (createdAt == null) {
@@ -90,5 +92,13 @@ public class JobEvent {
 
     public void setMessageId(String messageId) {
         this.messageId = messageId;
+    }
+
+    public String getSenderEmail() {
+        return senderEmail;
+    }
+
+    public void setSenderEmail(String senderEmail) {
+        this.senderEmail = senderEmail;
     }
 }
