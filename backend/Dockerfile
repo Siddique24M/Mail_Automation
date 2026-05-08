@@ -13,4 +13,5 @@ COPY --from=build /app/target/*.jar app.jar
 # Render dynamically assigns PORT — do not hardcode
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Add memory limits to prevent Out of Memory (OOM) crashes on Render's 512MB free tier
+ENTRYPOINT ["java", "-Xmx300m", "-Xss512k", "-XX:CICompilerCount=2", "-jar", "app.jar"]
