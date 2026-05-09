@@ -66,13 +66,13 @@ public class EmailParser {
 
         // Determine Event Type based on keywords
         String lowerContent = content.toLowerCase();
-        if (lowerContent.contains("screening")) {
+        if (lowerContent.contains("offer") || lowerContent.contains("shortlisted") || lowerContent.contains("selected") || lowerContent.contains("requirement")) {
             extractedData.put("type", "Other");
-        } else if (lowerContent.contains("interview")) {
+        } else if (lowerContent.contains("interview") || lowerContent.contains("screening")) {
             extractedData.put("type", "Interview");
         } else if (lowerContent.contains("exam") || lowerContent.contains("test")) {
             extractedData.put("type", "Exam");
-        } else if (lowerContent.contains("registration") || lowerContent.contains("apply")) {
+        } else if (lowerContent.contains("registration") || lowerContent.contains("apply") || lowerContent.contains("application")) {
             extractedData.put("type", "Registration");
         } else {
             extractedData.put("type", "Other");

@@ -142,7 +142,7 @@ public class GmailService {
             Gmail service = getGmailClient();
 
             // Search for keywords, newer than 10 days
-            String query = "subject:interview OR subject:exam OR subject:test OR subject:registration OR subject:screening newer_than:10d";
+            String query = "subject:interview OR subject:exam OR subject:test OR subject:registration OR subject:screening OR subject:requirement OR subject:application OR subject:offer OR subject:shortlisted OR subject:selected newer_than:10d";
             ListMessagesResponse response = service.users().messages().list("me").setQ(query).execute();
 
             List<Message> messages = response.getMessages();
