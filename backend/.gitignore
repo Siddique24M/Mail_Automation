@@ -12,6 +12,7 @@ bin/
 *.ipr
 .DS_Store
 .env
+application-local.properties
 
 logs/
 run_app.bat
