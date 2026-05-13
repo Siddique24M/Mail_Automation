@@ -85,7 +85,7 @@ const Dashboard = () => {
                         fontSize: '2.5rem',
                         boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
                     }}>
-                        sm
+                        SM
                     </div>
                     <h1 style={{ fontSize: '2.5rem', margin: 0 }}>Dashboard</h1>
                 </div>
