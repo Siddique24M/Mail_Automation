@@ -5,7 +5,7 @@ REM  Choose DB mode:
 REM    Supabase (default): set USE_LOCAL_DB=false
 REM    Local pgAdmin:      set USE_LOCAL_DB=true
 REM ============================================================
-set USE_LOCAL_DB=false
+set USE_LOCAL_DB=true
 
 echo Starting Backend Server...
 if "%USE_LOCAL_DB%"=="true" (

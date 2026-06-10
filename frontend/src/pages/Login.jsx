@@ -2,6 +2,8 @@ import React from 'react';
 import { loginWithGoogle } from '../services/api';
 import '../index.css';
 
+
+//lambda function based component 
 const Login = () => {
     return (
         <div className="container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -19,5 +21,5 @@ const Login = () => {
         </div>
     );
 };
-
+//default export
 export default Login;
